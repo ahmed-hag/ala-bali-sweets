@@ -1,0 +1,50 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "o79SrW2cALMBZ-iNrTzVP"
+uri = "file://artifacts/bakery/public/images/hero.png"
+type = "image"
+title = "Bakery hero banner"
+
+[[generated]]
+id = "ZsZXRsBwQohTauGmcLlZm"
+uri = "file://artifacts/bakery/public/images/brownie-1.png"
+type = "image"
+title = "Artisan brownie"
+
+[[generated]]
+id = "Dq0MrGppGvQtvoyJFtfjZ"
+uri = "file://artifacts/bakery/public/images/cupcake-1.png"
+type = "image"
+title = "Raspberry cupcake"
+
+[[generated]]
+id = "5LcWpLjjgV6MXj7mqKTuM"
+uri = "file://artifacts/bakery/public/images/brownie-2.png"
+type = "image"
+title = "Walnut brownie"
+
+[[generated]]
+id = "TCzxtYOH6h3Sh-pJN_nvz"
+uri = "file://artifacts/bakery/public/images/cupcake-2.png"
+type = "image"
+title = "Matcha cupcake"
+
+[[generated]]
+id = "016OwAhNB_ktHyNHnlElq"
+uri = "file://attached_assets/generated_images/generated_image.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "UoD1MsLZvRDcaD3kg1g0r"
+uri = "file://artifacts/bakery/public/images/classic-dark-brownie.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "uJtbQPNwAWjqKQam6_PXg"
+uri = "file://artifacts/bakery/public/images/salted-caramel-brownie.png"
+type = "image"
+title = "generated_image"
