@@ -1,0 +1,363 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Bakery ordering API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: products
+    description: Bakery products
+  - name: orders
+    description: Customer orders
+  - name: payments
+    description: Payment processing
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a single product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Validation error
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Not found
+
+  /payments/create-intent:
+    post:
+      operationId: createPaymentIntent
+      tags: [payments]
+      summary: Create a Stripe payment intent for an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentIntentBody"
+      responses:
+        "200":
+          description: Payment intent created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntentResponse"
+        "400":
+          description: Error
+
+  /payments/confirm:
+    post:
+      operationId: confirmPayment
+      tags: [payments]
+      summary: Confirm payment and update order status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfirmPaymentBody"
+      responses:
+        "200":
+          description: Payment confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /delivery-options:
+    get:
+      operationId: getDeliveryOptions
+      tags: [orders]
+      summary: Get available delivery options and pickup location
+      responses:
+        "200":
+          description: Delivery options
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryOptions"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          description: Price in USD
+        category:
+          type: string
+          enum: [brownie, cupcake]
+        imageUrl:
+          type: string
+        available:
+          type: boolean
+      required:
+        - id
+        - name
+        - description
+        - price
+        - category
+        - available
+
+    OrderItem:
+      type: object
+      properties:
+        productId:
+          type: integer
+        productName:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        subtotal:
+          type: number
+      required:
+        - productId
+        - productName
+        - quantity
+        - unitPrice
+        - subtotal
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        deliveryType:
+          type: string
+          enum: [delivery, pickup]
+        deliveryAddress:
+          type: string
+          description: Required for in-town delivery
+        totalAmount:
+          type: number
+        status:
+          type: string
+          enum: [pending, paid, preparing, ready, completed, cancelled]
+        paymentIntentId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        notes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - customerName
+        - customerEmail
+        - deliveryType
+        - totalAmount
+        - status
+        - items
+        - createdAt
+
+    CreateOrderBody:
+      type: object
+      properties:
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        deliveryType:
+          type: string
+          enum: [delivery, pickup]
+        deliveryAddress:
+          type: string
+          description: Required when deliveryType is delivery
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: integer
+              quantity:
+                type: integer
+            required:
+              - productId
+              - quantity
+        notes:
+          type: string
+      required:
+        - customerName
+        - customerEmail
+        - deliveryType
+        - items
+
+    CreatePaymentIntentBody:
+      type: object
+      properties:
+        orderId:
+          type: integer
+      required:
+        - orderId
+
+    PaymentIntentResponse:
+      type: object
+      properties:
+        clientSecret:
+          type: string
+        paymentIntentId:
+          type: string
+        amount:
+          type: number
+      required:
+        - clientSecret
+        - paymentIntentId
+        - amount
+
+    ConfirmPaymentBody:
+      type: object
+      properties:
+        orderId:
+          type: integer
+        paymentIntentId:
+          type: string
+      required:
+        - orderId
+        - paymentIntentId
+
+    DeliveryOptions:
+      type: object
+      properties:
+        inTownDelivery:
+          type: object
+          properties:
+            available:
+              type: boolean
+            description:
+              type: string
+            fee:
+              type: number
+          required:
+            - available
+            - description
+            - fee
+        pickup:
+          type: object
+          properties:
+            available:
+              type: boolean
+            address:
+              type: string
+            description:
+              type: string
+          required:
+            - available
+            - address
+            - description
+      required:
+        - inTownDelivery
+        - pickup
